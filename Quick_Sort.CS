@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+namespace QuickSort
+{
+    class Program
+    {
+        static int Partition(int[] array, int low, int high)
+        {
+           
+            int pivot = array[high]; 
+
+            int lowIndex = (low - 1);
+
+            for (int j = low; j < high; j++)
+            {
+                if (array[j] <= pivot)
+                {
+                    lowIndex++;
+
+                    int temp = array[lowIndex];
+                    array[lowIndex] = array[j];
+                    array[j] = temp;
+                }
+            }
+
+            int temp1 = array[lowIndex + 1];
+            array[lowIndex + 1] = array[high];
+            array[high] = temp1;
+
+            return lowIndex + 1;
+        }
+
+        static void Quick_sort(int[] array, int low, int high)
+        {
+            if (low < high)
+            {
+                int partitionIndex = Partition(array, low, high);
+
+                //3. Recursively continue sorting the array
+                Quick_sort(array, low, partitionIndex - 1);
+                Quick_sort(array, partitionIndex + 1, high);
+            }
+        }
+    
+
+        public static void Main(string[] args)
+        {
+            int[] arr = new int[7] { 10, 80, 30, 90, 40, 70, 50 };
+            Quick_sort(arr, 0, arr.Length - 1);
+            Console.WriteLine("Sorted Values:");
+            for (int i = 0; i < arr.Length; i++)
+                Console.WriteLine(arr[i]);
+        }
+
+    }
+}
