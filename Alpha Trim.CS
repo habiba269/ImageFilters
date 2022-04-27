@@ -1,212 +1,255 @@
-public static byte AlphaTrim(int [] ImageMatrix)
-        {
-            byte[] Array;
-            int neighborno;
-             int x;
-             int y;
-             
-            int[] Dx, Dy;
-            if (neighborno % 2 != 0)
-            {
-                Array = new byte[neighborno * neighborno];
-                Dx = new int[neighborno * neighborno];
-                Dy = new int[neighborno *neighborno];
-            }
-            else
-            {
-                Array = new byte[(neighborno + 1) * (neighborn + 1)];
-                Dx = new int[(neighborno + 1) * (neighborno+ 1)];
-                Dy = new int[(neighborno + 1) * (neighborno+ 1)];
-            }
-            int Index = 0;
-            for (int y = -(neighborno / 2); y <= (neighborno/ 2); y++)
-            {
-                for (int x = -(neighborno / 2);x <= (neighborno / 2); x++)
-                {
-                    Dx[Index] = x;
-                    Dy[Index] = y;
-                    Index++;
-                }
-            }
-            byte Max, Min, Z;
-            int ArrayLength, Sum, NewY, NewX, Avg;
-            Sum = 0;
-            Max = 0;
-            Min = 255;
-            ArrayLength = 0;
-            Z = ImageMatrix[y, x];
-            for (int i = 0; i < neighborno * neighborno; i++)
-            {
-                NewY = y + Dy[i];
-                NewX = x + Dx[i];
-                if (NewX >= 0 && NewX < GetWidth(ImageMatrix) && NewY >= 0 && NewY < GetHeight(ImageMatrix))
-                {
-                    Array[ArrayLength] = ImageMatrix[NewY, NewX];
-                    if (Array[ArrayLength] > Max)
-                        Max = Array[ArrayLength];
-                    if (Array[ArrayLength] < Min)
-                        Min = Array[ArrayLength];
-                    Sum += Array[ArrayLength];
-                    ArrayLength++;
-                }
-            }
-            
-            Sum -= Max;
-            Sum -= Min;
-            ArrayLength -= 2;
-            Avg = Sum / ArrayLength;
-            return (byte)Avg;
-            =================================================================================================================================
-           
-
- 
- // A C# program to find k'th smallest element using max heap
 using System;
-  
-public class GFG {
-  
-    // A class for Max Heap
-    public
-  
-        class MaxHeap {
-        public
-  
-            int[] harr; // pointer to array of elements in
-                        // heap
-        public
-  
-            int capacity; // maximum possible size of max
-                          // heap
-        public
-  
-            int heap_size; // Current number of elements in
-                           // max heap
-  
-        public
-  
-            int
-            parent(int i)
-        {
-            return (i - 1) / 2;
-        }
-        public
-  
-            int
-            left(int i)
-        {
-            return (2 * i + 1);
-        }
-        public
-  
-            int
-            right(int i)
-        {
-            return (2 * i + 2);
-        }
-        public
-  
-            int
-            getMax()
-        {
-            return harr[0];
-        } // Returns maximum
-  
-        // to replace root with new node x and heapify() new
-        // root
-        public
-  
-            void
-            replaceMax(int x)
-        {
-            this.harr[0] = x;
-            maxHeapify(0);
-        }
-        public
-  
-            MaxHeap(int[] a, int size)
-        {
-            heap_size = size;
-            harr = a; // store address of array
-            int i = (heap_size - 1) / 2;
-            while (i >= 0) {
-                maxHeapify(i);
-                i--;
-            }
-        }
-  
-        // Method to remove maximum element (or root) from
-        // max heap
-        public
-  
-            int
-            extractMax()
-        {
-            if (heap_size == 0)
-                return int.MaxValue;
-  
-            // Store the maximum vakue.
-            int root = harr[0];
-  
-            // If there are more than 1 items, move the last
-            // item to root and call heapify.
-            if (heap_size > 1) {
-                harr[0] = harr[heap_size - 1];
-                maxHeapify(0);
-            }
-            heap_size--;
-            return root;
-        }
-  
-        // A recursive method to heapify a subtree with root
-        // at given index This method assumes that the
-        // subtrees are already heapified
-        public
-  
-            void
-            maxHeapify(int i)
-        {
-            int l = left(i);
-            int r = right(i);
-            int largest = i;
-            if (l < heap_size && harr[l] > harr[i])
-                largest = l;
-            if (r < heap_size && harr[r] > harr[largest])
-                largest = r;
-            if (largest != i) {
-                int t = harr[i];
-                harr[i] = harr[largest];
-                harr[largest] = t;
-                maxHeapify(largest);
-            }
-        }
-    };
-  
-    // Function to return k'th largest element in a given
-    // array
-    int kthSmallest(int[] arr, int n, int k)
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using ZGraphTools;
+
+namespace ImageFilters
+{
+    public partial class Alpha_Trim : Form
     {
-  
-        // Build a heap of first k elements: O(k) time
-        MaxHeap mh = new MaxHeap(arr, k);
-  
-        // Process remaining n-k elements.  If current
-        // element is smaller than root, replace root with
-        // current element
-        for (int i = k; i < n; i++)
-            if (arr[i] < mh.getMax())
-                mh.replaceMax(arr[i]);
-  
-        // Return root
-        return mh.getMax();
-    }
-  
-    // Driver code
-    public static void Main(String[] args)
-    {
-        int[] arr = { 12, 3, 5, 7, 19 };
-        int n = arr.Length, k = 4;
-        GFG gfg = new GFG();
-        Console.Write("K'th smallest element is "
-                      + gfg.kthSmallest(arr, n, k));
+
+
+        int filter_size, trimming_value;
+
+        static byte[,] imgMatrix;
+        static byte[,] outputImg;
+        int G_max;
+        public Alpha_Trim(byte[,] images)
+        {
+            imgMatrix = images;
+            InitializeComponent();
+        }
+
+        private byte[] countingSort(byte[] arr)
+        {
+            int size = arr.Length;
+            int maxValue = -1000000;
+            for (int i = 0; i < size; i++)
+            {
+                if (arr[i] > maxValue)
+                {
+                    maxValue = arr[i];
+                }
+            }
+            int[] count = new int[maxValue + 1];
+
+            for (int i = 0; i < size; i++)
+            {
+                count[arr[i]]++;
+            }
+
+            for (int i = 1; i <= maxValue; i++)
+            {
+                count[i] = count[i] + count[i - 1];
+            }
+
+            byte[] sortedArr = new byte[size];
+
+            for (int i = size - 1; i >= 0; i--)
+            {
+                sortedArr[--count[arr[i]]] = arr[i];
+            }
+
+            return sortedArr;
+
+        }
+
+
+        public static int left(int i)
+        {
+            return 2 * i + 1;
+        }
+        public static int right(int i)
+        {
+            return 2 * i + 2;
+        }
+        public static void maxHeapify(byte[] Array, int ArrayLength, int i)
+        {
+            int Left = left(i);
+            int Right = right(i);
+            int Largest;
+            if (Left < ArrayLength && Array[Left] > Array[i])
+                Largest = Left;
+            else
+                Largest = i;
+            if (Right < ArrayLength && Array[Right] > Array[Largest])
+                Largest = Right;
+            if (Largest != i)
+            {
+                byte Temp = Array[i];
+                Array[i] = Array[Largest];
+                Array[Largest] = Temp;
+                maxHeapify(Array, ArrayLength, Largest);
+            }
+        }
+        public static void buildingMaxHeapifying(byte[] Array, int ArrayLength)
+        {
+            for (int i = ArrayLength / 2 - 1; i >= 0; i--)
+                maxHeapify(Array, ArrayLength, i);
+        }
+        public static byte[] sortingHeap(byte[] Array, int ArrayLength)
+        {
+            int HeapSize = ArrayLength;
+            buildingMaxHeapifying(Array, ArrayLength);
+            for (int i = ArrayLength - 1; i > 0; i--)
+            {
+                byte Temp = Array[0];
+                Array[0] = Array[i];
+                Array[i] = Temp;
+                HeapSize--;
+                maxHeapify(Array, HeapSize, 0);
+            }
+            return Array;
+        }
+
+        public void imgLoop(int sorting_Method)
+        {
+            for (int i = filter_size/2; i < imgMatrix.GetLength(0)-(filter_size/2); i++)
+            {
+                for (int j = filter_size/2; j < imgMatrix.GetLength(1)-(filter_size/2); j++)
+                {
+                    applyFilter(i, j, sorting_Method);
+
+                }
+            }
+        }
+
+        public void applyFilter(int height_pos, int width_pos, int sorting_Method)
+        {
+            byte[] pixelArray = new byte[filter_size * filter_size];
+            int index=0;
+
+            for (int i = height_pos- (filter_size/2); i <= height_pos+(filter_size/2); i++)
+            {
+
+                for (int j = width_pos-(filter_size/2); j <= width_pos+(filter_size/2); j++)
+                {
+
+                    pixelArray[index] = imgMatrix[i, j];
+                    index++;
+
+
+                }
+
+            }
+
+            if (sorting_Method == 1)
+            {
+                pixelArray = countingSort(pixelArray);
+            }
+            else if (sorting_Method == 2) 
+            {
+                pixelArray = sortingHeap(pixelArray, pixelArray.Length);           
+            }
+
+            int sum = 0;
+            int count = 0;
+
+
+            for(int i = trimming_value; i <pixelArray.Length-trimming_value; i++)
+            {
+                sum += pixelArray[i];
+                count++;
+            }
+
+            int avg = sum / count;
+
+            outputImg[height_pos - (filter_size / 2), width_pos - (filter_size / 2)] = (byte)avg;
+
+
+        }
+
+        private void Alpha_Trim_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Graph_Button_Click(object sender, EventArgs e)
+        {
+            G_max = Decimal.ToInt32(Graph_Input.Value);
+            int N = G_max;
+            double[] x_values = new double[N+1];
+            double[] y_values_N = new double[N+1];
+            double[] y_values_NT = new double[N+1];
+            Stopwatch stopwatch = new Stopwatch();
+            TimeSpan ts;
+            int xIndex = 0;
+
+            if (object.Equals(outputImg, null))
+            {
+                outputImg = new byte[imgMatrix.GetLength(0) - (filter_size - 1), imgMatrix.GetLength(1) - (filter_size - 1)];
+            }
+
+            for(int i = 0; i <= G_max; i++)
+            {
+
+
+                x_values[xIndex++] = i;
+
+
+            }
+
+
+            for (int j = 3; j <= G_max; j += 2)
+            {
+                stopwatch.Reset();
+                stopwatch.Start();
+                filter_size = j;
+                imgLoop(1);
+                stopwatch.Stop();
+                ts = stopwatch.Elapsed;
+
+                y_values_N[j] = ts.TotalMilliseconds;
+                y_values_N[j-1] = ts.TotalMilliseconds;
+
+
+            }
+
+            
+            for (int j = 3; j <= G_max; j += 2)
+            {
+                stopwatch.Reset();
+                stopwatch.Start();
+                filter_size = j;
+                imgLoop(2);
+                stopwatch.Stop();
+                ts = stopwatch.Elapsed;
+
+                y_values_NT[j] = ts.TotalMilliseconds;
+                y_values_NT[j - 1] = ts.TotalMilliseconds;
+
+            }
+
+            ZGraphForm ZGF = new ZGraphForm("Alpha Trim Graph", "N", "f(N)");
+            ZGF.add_curve("Counting Sort: f(N) = N + K", x_values, y_values_N, Color.Red); 
+            ZGF.add_curve("Kth Element: f(N) = (K + (N-K)*Log K", x_values, y_values_NT, Color.Blue); 
+            ZGF.Show();
+
+        }
+
+        
+
+        private void Start_Click(object sender, EventArgs e)
+        {
+            
+            int outputHeight = imgMatrix.GetLength(0) - (filter_size - 1);
+            int outputWidth = imgMatrix.GetLength(1) - (filter_size - 1);
+            outputImg = new byte[outputHeight, outputWidth];
+
+            filter_size = Decimal.ToInt32(numericUpDown_N.Value);
+            trimming_value = Decimal.ToInt32(numericUpDown_T.Value);
+            imgLoop(2);
+            ImageOperations.DisplayImage(outputImg, pictureBox1);
+        }
     }
 }
